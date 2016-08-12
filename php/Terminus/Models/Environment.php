@@ -722,28 +722,6 @@ class Environment extends TerminusModel {
   }
 
   /**
-   * Sets the PHP version number of this environment
-   *
-   * @param string $version_number The version number to set this environment to
-   *  use
-   * @return void
-   */
-  public function setPhpVersion($version_number) {
-    $options = [
-      'environment' => $this->get('id'),
-      'params'      => [
-        'key'   => 'php_version',
-        'value' => $version_number,
-      ],
-    ];
-    $workflow = $this->site->workflows->create(
-      'update_environment_setting',
-      $options
-    );
-    return $workflow;
-  }
-
-  /**
    * Disable HTTP Basic Access authentication on the web environment
    *
    * @return Workflow
