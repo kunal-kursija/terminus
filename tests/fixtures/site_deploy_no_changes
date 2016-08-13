@@ -260,3 +260,37 @@
             ETag: 'W/"1a2-68a7e72a"'
             Vary: Accept-Encoding
         body: '[{"gravitar_url": "https://secure.gravatar.com/avatar/9631f4a345eabaa121f599004f32fab2?s=40&d=https%3A%2F%2Fpantheon-content.s3.amazonaws.com%2Fblank_user.png", "hash": "295b22b5501e6517e3080ac38e8564a5f0038276", "author": "Root", "labels": ["test", "dev"], "datetime": "2016-01-14T22:45:45", "parents": ["93d1c75f1d1025b4b42f01305f5d09c71764f247"], "message": "\"Initial Commit\"\n", "email": "root@getpantheon.com"}]'
+-
+    request:
+        method: GET
+        url: 'https://dashboard.pantheon.io/api/site-names/behat-tests'
+        headers:
+            Host: dashboard.pantheon.io
+            Accept-Encoding: null
+            User-Agent: 'Terminus/0.11.4 (php_version=7.0.6&script=vendor/phpunit/phpunit/phpunit)'
+            Content-type: application/json
+            Authorization: 'Bearer c2653a9a-308f-4207-b3a1-36a73411c818:5517a9c4-c073-11e5-a597-bc764e10f058:5vcfiFr6hsjkfkfloH40V'
+            headers: 'Bearer c2653a9a-308f-4207-b3a1-36a73411c818:5517a9c4-c073-11e5-a597-bc764e10f058:5vcfiFr6hsjkfkfloH40V'
+            verify: '1'
+            method: get
+            absolute_url: ''
+            Accept: null
+    response:
+        status:
+            http_version: '1.1'
+            code: '401'
+            message: Unauthorized
+        headers:
+            Server: nginx
+            Date: 'Fri, 12 Aug 2016 20:42:36 GMT'
+            Content-Type: application/json
+            Content-Length: '57'
+            Connection: keep-alive
+            X-Pantheon-Trace-Id: 4d1ae830-60cd-11e6-992f-dda8de1dafe7
+            X-Frame-Options: deny
+            Access-Control-Allow-Methods: GET
+            Access-Control-Allow-Headers: 'Origin, Content-Type, Accept'
+            Cache-Control: no-cache
+            Pragma: no-cache
+            Vary: Accept-Encoding
+        body: '"Invalid or expired session header: X-Pantheon-Session\n"'

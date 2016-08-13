@@ -2,11 +2,11 @@
 
 namespace Terminus\Models;
 
-class UserOrganizationMembership extends TerminusModel {
+class UserSiteMembership extends TerminusModel {
   /**
-   * @var Organization
+   * @var Site
    */
-  public $organization;
+  public $site;
   /**
    * @var User
    */
@@ -21,11 +21,11 @@ class UserOrganizationMembership extends TerminusModel {
    */
   public function __construct($attributes = null, array $options = []) {
     parent::__construct($attributes, $options);
-    $this->user         = $options['user'];
-    $this->organization = new Organization(
-      $attributes->organization,
-      ['id' => $attributes->organization->id, 'memberships' => [$this,],]
+    $this->site = new Site(
+      $attributes->site,
+      ['id' => $attributes->site->id, 'memberships' => [$this,],]
     );
+    $this->user = $options['collection']->user;
   }
 
 }

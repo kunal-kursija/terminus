@@ -2,16 +2,11 @@
 
 namespace Terminus\Commands;
 
-use Terminus\Commands\TerminusCommand;
 use Terminus\Configurator;
 use Terminus\Models\Collections\Sites;
-use Terminus\Models\Organization;
 use Terminus\Models\Site;
 use Terminus\Models\Upstreams;
-use Terminus\Models\User;
-use Terminus\Models\Workflow;
 use Terminus\Session;
-use Terminus\Utils;
 
 /**
  * Actions on multiple sites
@@ -172,37 +167,29 @@ class SitesCommand extends TerminusCommand {
    * @alias show
    */
   public function index($args, $assoc_args) {
-    // Always fetch a fresh list of sites
-    if (!isset($assoc_args['cached'])) {
-      $this->sites->rebuildCache();
-    }
-    $sites = $this->sites->all();
-
-    if (isset($assoc_args['team'])) {
-      $sites = $this->filterByTeamMembership($sites);
-    }
-    if (isset($assoc_args['org'])) {
-      $org_id = $this->input()->orgId(
+    $options = [
+      'org_id'    => $this->input()->optional(
         [
-          'allow_none' => true,
-          'args'       => $assoc_args,
-          'default'    => 'all',
+          'choices' => $assoc_args,
+          'default' => null,
+          'key'     => 'org',
         ]
-      );
-      $sites = $this->filterByOrganizationalMembership($sites, $org_id);
-    }
+      ),
+      'team_only' => isset($assoc_args['team']),
+    ];
+    $this->sites->fetch($options);
 
     if (isset($assoc_args['name'])) {
-      $sites = $this->filterByName($sites, $assoc_args['name']);
+      $this->sites->filterByName($assoc_args['name']);
     }
-
     if (isset($assoc_args['owner'])) {
       $owner_uuid = $assoc_args['owner'];
       if ($owner_uuid == 'me') {
-        $owner_uuid = Session::getData()->user_uuid;
+        $owner_uuid = $this->user->id;
       }
-      $sites = $this->filterByOwner($sites, $owner_uuid);
+      $this->sites->filterByOwner($owner_uuid);
     }
+    $sites = $this->sites->all();
 
     if (count($sites) == 0) {
       $this->log()->warning('You have no sites.');
@@ -211,19 +198,24 @@ class SitesCommand extends TerminusCommand {
     $rows = [];
     foreach ($sites as $site) {
       $memberships = [];
-      foreach ($site->get('memberships') as $membership) {
-        $memberships[$membership['id']] = $membership['name'];
+      foreach ($site->memberships as $membership) {
+        if (property_exists($membership, 'user')) {
+          $memberships[] = "{$membership->user->id}: Team";
+        } elseif (property_exists($membership, 'organization')) {
+          $profile       = $membership->organization->get('profile');
+          $memberships[] = "{$membership->organization->id}: {$profile->name}";
+        }
       }
-      $rows[$site->get('id')] = [
+      $rows[$site->id] = [
         'name'          => $site->get('name'),
-        'id'            => $site->get('id'),
+        'id'            => $site->id,
         'service_level' => $site->get('service_level'),
         'framework'     => $site->get('framework'),
         'owner'         => $site->get('owner'),
         'created'       => date(TERMINUS_DATE_FORMAT, $site->get('created')),
-        'memberships'   => $memberships,
+        'memberships'   => implode(', ', $memberships),
       ];
-      if ((boolean)$site->get('frozen')) {
+      if (!is_null($site->get('frozen'))) {
         $rows[$site->get('id')]['frozen'] = true;
       }
     }

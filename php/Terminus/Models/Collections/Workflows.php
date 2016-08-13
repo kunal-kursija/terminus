@@ -30,7 +30,7 @@ class Workflows extends TerminusCollection {
     if (isset($options['environment'])) {
       $this->environment = $options['environment'];
     }
-    $params = array_merge($this->getFetchArgs(), $options['params']);
+    $params = array_merge($this->args, $options['params']);
 
     $results = $this->request->request(
       $this->getFetchUrl(),

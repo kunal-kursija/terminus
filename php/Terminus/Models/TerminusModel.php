@@ -7,15 +7,22 @@ use Terminus\Exceptions\TerminusException;
 use Terminus\Request;
 
 abstract class TerminusModel {
+  /**
+   * @var object
+   */
+  protected $attributes;
+  /**
+   * @var string
+   */
   protected $id;
   /**
    * @var Request
    */
   protected $request;
   /**
-   * @var object
+   * @var string
    */
-  protected $attributes;
+  protected $url;
 
   /**
    * Object constructor
@@ -79,7 +86,7 @@ abstract class TerminusModel {
 
     $options = array_merge(
       array('options' => array('method' => 'get')),
-      $this->getFetchArgs(),
+      $this->args,
       $fetch_args
     );
 
@@ -127,15 +134,6 @@ abstract class TerminusModel {
   public function has($attribute) {
     $isset = isset($this->attributes->$attribute);
     return $isset;
-  }
-
-  /**
-   * Give necessary args for collection data fetching
-   *
-   * @return array
-   */
-  protected function getFetchArgs() {
-    return array();
   }
 
   /**
