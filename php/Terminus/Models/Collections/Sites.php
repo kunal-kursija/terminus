@@ -3,9 +3,7 @@
 namespace Terminus\Models\Collections;
 
 use Terminus\Session;
-use Terminus\Caches\SitesCache;
 use Terminus\Exceptions\TerminusException;
-use Terminus\Models\Organization;
 use Terminus\Models\Site;
 use Terminus\Models\User;
 use Terminus\Models\Workflow;
@@ -178,7 +176,7 @@ class Sites extends TerminusCollection {
         );
       }
       $site = new Site(
-        ['id' => $uuid,],
+        (object)['id' => $uuid,],
         ['id' => $uuid, 'collection' => $this,]
       );
       $site->fetch();

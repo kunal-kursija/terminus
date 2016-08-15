@@ -8,6 +8,10 @@ use Terminus\Request;
 
 abstract class TerminusModel {
   /**
+   * @var array Arguments for fetching this model's information
+   */
+  protected $args = [];
+  /**
    * @var object
    */
   protected $attributes;
@@ -20,7 +24,7 @@ abstract class TerminusModel {
    */
   protected $request;
   /**
-   * @var string
+   * @var string The URL at which to fetch this model's information
    */
   protected $url;
 

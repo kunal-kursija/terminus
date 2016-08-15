@@ -266,16 +266,6 @@ class FeatureContext implements Context {
   }
 
   /**
-   * Clears the Terminus Sites Cache
-   * @Then /^I clear the Terminus cache$/
-   *
-   * @return [void]
-   */
-  public function iRebuildTheTerminusCache() {
-    $this->iRun("terminus sites cache --rebuild");
-  }
-
-  /**
    * Commits changes to given site's given env with given message
    * @When /^I commit changes to the "([^"]*)" environment of "([^"]*)" with message "([^"]*)"$/
    *

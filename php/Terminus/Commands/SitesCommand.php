@@ -118,13 +118,13 @@ class SitesCommand extends TerminusCommand {
    *
    */
   public function create($args, $assoc_args) {
-    $options                = $this->getSiteCreateOptions($assoc_args);
+    $options = $this->getSiteCreateOptions($assoc_args);
     $options['upstream_id'] = $this->input()->upstream(
       ['args' => $assoc_args,]
     );
     $this->log()->info('Creating new site installation ... ');
 
-    $workflow = $this->sites->addSite($options);
+    $workflow = $this->sites->create($options);
     $workflow->wait();
     $this->workflowOutput($workflow);
 
@@ -270,11 +270,6 @@ class SitesCommand extends TerminusCommand {
    * @subcommand mass-update
    */
   public function massUpdate($args, $assoc_args) {
-    // Ensure the sitesCache is up to date
-    if (!isset($assoc_args['cached'])) {
-      $this->sites->rebuildCache();
-    }
-
     $upstream = $this->input()->optional(
       array(
         'key'     => 'upstream',
@@ -309,7 +304,7 @@ class SitesCommand extends TerminusCommand {
     if ($tag) {
       $org = $this->input()->orgId(array('args' => $assoc_args));
     }
-    $sites = $this->sites->filterAllByTag($tag, $org);
+    $sites = $this->sites->filterByTag($tag, $org)->all();
 
     // Start status messages.
     if ($upstream) {
