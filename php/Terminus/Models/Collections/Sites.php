@@ -26,6 +26,15 @@ class Sites extends TerminusCollection {
   }
 
   /**
+   * Retrieves all sites
+   *
+   * @return Site[]
+   */
+  public function all() {
+    $models = array_values($this->models);
+    return $models;
+  }
+  /**
    * Creates a new site
    *
    * @param string[] $params Options for the new site, elements as follow:

@@ -69,6 +69,7 @@ abstract class TerminusCollection extends TerminusModel {
 
   /**
    * Retrieves all models
+   * TODO: Remove automatic fetching and make fetches explicit
    *
    * @return TerminusModel[]
    */

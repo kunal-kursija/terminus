@@ -16,8 +16,8 @@ default:
               other_user:              'sara@getpantheon.com'
               php_site_domain:         'onebox.pantheon.io'
               instrument_label:        'Visa - 1111'
-              enterprise_org_uuid:     'bf200cbe-8995-4891-b5d4-1a8bdc292905'
-              enterprise_org_name:     'Organization'
+              organization_uuid:       'd30aa414-861c-4d8d-b147-9c8ef2ba3365'
+              organization_name:       "Ari's Agency"
               machine_token:           'NRobjHROIQzDfmz2XEGzIZrnXP4ooTxG8FIGWracyUESB'
               machine_token_device:    'Behat Testing Token'
               machine_token_id:        'dcr_q4tFMiYiK9DfJO15'
@@ -36,6 +36,8 @@ default:
               other_user:              'sara@getpantheon.com'
               php_site_domain:         'pantheonsite.io'
               instrument_label:        'Visa - 1111'
+              organization_uuid:       'd30aa414-861c-4d8d-b147-9c8ef2ba3365'
+              organization_name:       "Ari's Agency"
               enterprise_org_uuid:     ''
               enterprise_org_name:     ''
               machine_token:           'NRobjHROIQzDfmz2XEGzIZrnXP4ooTxG8FIGWracyUESB'

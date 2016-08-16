@@ -63,9 +63,7 @@ class FeatureContext implements Context {
   public function aSiteNamed($site) {
     $output = $this->iGetInfoForTheSite($site);
     if (!$this->_checkResult('created', $output)) {
-      $this->iCreateSiteNamed('Drupal 7', $site);
-      $recurse = $this->aSiteNamed($site);
-      return $recurse;
+      throw new Exception("Your user does not have a site named $site.");
     }
     return true;
   }
