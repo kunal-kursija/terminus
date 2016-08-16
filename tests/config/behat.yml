@@ -7,42 +7,36 @@ default:
         - FeatureContext:
             parameters:
               username:                'devuser@pantheon.io'
-              user_uuid:               '25069e79-eae7-4d41-8925-1f728a114cb8'
+              user_uuid:               '25069e79-eae7-4d41-8925-1f'
               password:                'password1'
-              machine_token:           'EAJ08XqjxTbXD125qU9L5HSqlDdl9UnWHqpdB1nmt5f1x'
               host:                    'onebox'
-              vcr_mode:                'new_episodes'
+              vcr_mode:                'none'
               test_site_name:          'behat-tests'
-              test_site_hostname:      'dev-behat-tests.onebox.pantheon.io'
+              test_site_hostname:      'dev-behat-tests.onebox.panth.io'
               other_user:              'sara@getpantheon.com'
               php_site_domain:         'onebox.pantheon.io'
               payment_instrument_uuid: '8558e04f-3674-481e-b448-bccff73cb430'
-              machine_token_id:        'dcr_NVvFVvHaPrQRfMZX'
               machine_token_device:    'Terminus on My Laptop'
               enterprise_org_uuid:     'bf200cbe-8995-4891-b5d4-1a8bdc292905'
-              enterprise_org_name:     'EnterpriseOrg'
+              enterprise_org_name:     'Organization'
               machine_token:           'EAJ08XqjxTbXD125qU9L5HSqlDdl9UnWHqpdB1nmt5f1x'
-    ci:
+    prod:
       paths: [ %paths.base%/../features ]
       contexts:
         - FeatureContext:
             parameters:
-              username:                'devuser@pantheon.io'
-              user_uuid:               '25069e79-eae7-4d41-8925-1f728a114cb8'
-              password:                'password1'
-              host:                    'onebox'
-              vcr_mode:                'once'
+              username:                'tesladethray@gmail.com'
+              user_uuid:               'cbc3d67f-f2b9-44a0-8dd6-8d63265af96e'
+              password:                'sakura21'
+              host:                    'dashboard.pantheon.io'
+              vcr_mode:                'new_episodes'
               test_site_name:          'behat-tests'
-              test_site_hostname:      'dev-behat-tests.onebox.pantheon.io'
+              test_site_hostname:      'dev-behat-tests.pantheonsite.io'
               other_user:              'sara@getpantheon.com'
-              php_site_domain:         'onebox.pantheon.io'
-              payment_instrument_uuid: '8558e04f-3674-481e-b448-bccff73cb430'
-              machine_token_id:        'dcr_NVvFVvHaPrQRfMZX'
-              machine_token_device:    'Terminus on My Laptop'
-              enterprise_org_uuid:     'bf200cbe-8995-4891-b5d4-1a8bdc292905'
-              enterprise_org_name:     'EnterpriseOrg'
-              machine_token:           'EAJ08XqjxTbXD125qU9L5HSqlDdl9UnWHqpdB1nmt5f1x'
-    ci:
+              php_site_domain:         'pantheonsite.io'
+              enterprise_org_uuid:     ''
+              enterprise_org_name:     ''
+              machine_token:           'NRobjHROIQzDfmz2XEGzIZrnXP4ooTxG8FIGWracyUESB'
     qa:
       paths: [ %paths.base%/../qa_features ]
       contexts:
@@ -59,7 +53,6 @@ default:
               payment_instrument_uuid: '8558e04f-3674-481e-b448-bccff73cb430'
               enterprise_org_uuid:     'bf200cbe-8995-4891-b5d4-1a8bdc292905'
               enterprise_org_name:     'EnterpriseOrg'
-    ci:
       formatter:
         name: HtmlFormatter
         output_path: /tmp/terminus_qa_report.html

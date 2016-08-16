@@ -186,7 +186,6 @@ class FeatureContext implements Context {
    */
   public function iAmAuthenticated() {
     $this->iLogIn();
-    $this->iRun("terminus sites list");
   }
 
   /**
@@ -525,31 +524,32 @@ class FeatureContext implements Context {
 
   /**
    * Logs in user
+   * @When /^I log in via machine token "([^"]*)"$/
+   * @When /^I log in via machine token$/
+   * @When /^I log in$/
+   *
+   * @param [string] $token A Pantheon machine token
+   * @return [void]
+   */
+  public function iLogIn(
+      $token = '[[machine_token]]'
+  ) {
+    $this->iRun("terminus auth login --machine-token=$token");
+  }
+
+  /**
+   * Logs in user
    * @When /^I log in as "([^"]*)" with password "([^"]*)"$/
    *
    * @param [string] $username Pantheon username for login
    * @param [string] $password Password for username
    * @return [void]
    */
-  public function iLogIn(
+  public function iLogInViaUsernameAndPassword(
       $username = '[[username]]',
       $password = '[[password]]'
   ) {
     $this->iRun("terminus auth login $username --password=$password");
-  }
-
-  /**
-   * Logs in user
-   * @When /^I log in via machine token "([^"]*)"$/
-   * @When /^I log in via machine token$/
-   *
-   * @param [string] $token A Pantheon machine token
-   * @return [void]
-   */
-  public function iLogInViaMachineToken(
-      $token = '[[machine_token]]'
-  ) {
-    $this->iRun("terminus auth login --machine-token=$token");
   }
 
   /**

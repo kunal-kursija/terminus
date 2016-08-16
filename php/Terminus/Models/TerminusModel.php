@@ -94,10 +94,12 @@ abstract class TerminusModel {
       $fetch_args
     );
 
-    $results = $this->request->request(
-      $this->getFetchUrl(),
-      $options
-    );
+    if (isset($this->url)) {
+      $fetch_url = $this->url;
+    } else {
+      $fetch_url = $this->getFetchUrl();
+    }
+    $results = $this->request->request($fetch_url, $options);
 
     $data = $results['data'];
     $data = $this->parseAttributes($data);

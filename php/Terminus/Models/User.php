@@ -48,6 +48,7 @@ class User extends TerminusModel {
    */
   public function __construct($attributes = null, array $options = []) {
     parent::__construct($attributes, $options);
+    $this->url = "users/{$this->id}";
 
     $params                 = ['user' => $this,];
     $this->instruments      = new Instruments($params);
