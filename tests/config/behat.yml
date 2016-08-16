@@ -16,10 +16,11 @@ default:
               other_user:              'sara@getpantheon.com'
               php_site_domain:         'onebox.pantheon.io'
               instrument_label:        'Visa - 1111'
-              machine_token_device:    'Terminus on My Laptop'
               enterprise_org_uuid:     'bf200cbe-8995-4891-b5d4-1a8bdc292905'
               enterprise_org_name:     'Organization'
-              machine_token:           'EAJ08XqjxTbXD125qU9L5HSqlDdl9UnWHqpdB1nmt5f1x'
+              machine_token:           'NRobjHROIQzDfmz2XEGzIZrnXP4ooTxG8FIGWracyUESB'
+              machine_token_device:    'Behat Testing Token'
+              machine_token_id:        'dcr_q4tFMiYiK9DfJO15'
     prod:
       paths: [ %paths.base%/../features ]
       contexts:
@@ -38,6 +39,8 @@ default:
               enterprise_org_uuid:     ''
               enterprise_org_name:     ''
               machine_token:           'NRobjHROIQzDfmz2XEGzIZrnXP4ooTxG8FIGWracyUESB'
+              machine_token_device:    'Behat Testing Token'
+              machine_token_id:        'dcr_q4tFMiYiK9DfJO15'
     qa:
       paths: [ %paths.base%/../qa_features ]
       contexts:
