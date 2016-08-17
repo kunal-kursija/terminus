@@ -985,10 +985,9 @@ class InputHelper extends TerminusHelper {
       $org_list = ['-' => 'None'];
     }
     $user          = Session::getUser();
-    $organizations = $user->organizations->all();
-    foreach ($organizations as $id => $org) {
-      $org_data                  = $org->get('organization');
-      $org_list[$org->get('id')] = $org_data->profile->name;
+    $organizations = $user->getOrganizations();
+    foreach ($organizations as $org) {
+      $org_list[$org->get('id')] = $org->profile->name;
     }
     return $org_list;
   }

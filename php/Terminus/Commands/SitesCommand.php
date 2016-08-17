@@ -145,8 +145,6 @@ class SitesCommand extends TerminusCommand {
 
   /**
    * Show all sites user has access to
-   * Note: because of the size of this call, it is cached
-   *   and also is the basis for loading individual sites by name
    *
    * [--team]
    * : Filter for sites you are a team member of
@@ -159,9 +157,6 @@ class SitesCommand extends TerminusCommand {
    *
    * [--name=<regex>]
    * : Filter sites you can access via name
-   *
-   * [--cached]
-   * : Causes the command to return cached sites list instead of retrieving anew
    *
    * @subcommand list
    * @alias show
@@ -264,47 +259,31 @@ class SitesCommand extends TerminusCommand {
    * [--org=<id>]
    * : Only necessary if using --tag. Organization which has tagged the site
    *
-   * [--cached]
-   * : Set to prevent rebuilding of sites cache
-   *
    * @subcommand mass-update
    */
   public function massUpdate($args, $assoc_args) {
     $upstream = $this->input()->optional(
-      array(
-        'key'     => 'upstream',
-        'choices' => $assoc_args,
-        'default' => false,
-      )
+      ['key' => 'upstream', 'choices' => $assoc_args, 'default' => false,]
     );
-    $data     = array();
-    $report   = $this->input()->optional(
-      array(
-        'key'     => 'report',
-        'choices' => $assoc_args,
-        'default' => false,
-      )
+    $report = $this->input()->optional(
+      ['key' => 'report', 'choices' => $assoc_args, 'default' => false,]
     );
-    $confirm   = $this->input()->optional(
-      array(
-        'key'     => 'confirm',
-        'choices' => $assoc_args,
-        'default' => false,
-      )
+    $confirm = $this->input()->optional(
+      ['key' => 'confirm', 'choices' => $assoc_args, 'default' => false,]
     );
-    $tag       = $this->input()->optional(
-      array(
-        'key'     => 'tag',
-        'choices' => $assoc_args,
-        'default' => false,
-      )
+    $tag = $this->input()->optional(
+      ['key' => 'tag', 'choices' => $assoc_args, 'default' => false,]
     );
 
     $org = '';
     if ($tag) {
-      $org = $this->input()->orgId(array('args' => $assoc_args));
+      $org = $this->input()->orgId(['args' => $assoc_args,]);
     }
-    $sites = $this->sites->filterByTag($tag, $org)->all();
+    $this->sites->fetch();
+    if ($tag !== false) {
+      $this->sites->filterByTag($tag, $org);
+    }
+    $sites = $this->sites->all();
 
     // Start status messages.
     if ($upstream) {
@@ -314,6 +293,7 @@ class SitesCommand extends TerminusCommand {
       );
     }
 
+    $data = [];
     foreach ($sites as $site) {
       $context = array('site' => $site->get('name'));
       $site->fetch();
