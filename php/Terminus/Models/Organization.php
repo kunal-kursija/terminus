@@ -28,7 +28,7 @@ class Organization extends TerminusModel {
    * Object constructor
    *
    * @param object $attributes Attributes of this model
-   * @param array $options    Options to set as $this->key
+   * @param array  $options    Options to set as $this->key
    * @return Organization
    */
   public function __construct($attributes = null, array $options = []) {
@@ -66,11 +66,15 @@ class Organization extends TerminusModel {
   public function getSites() {
     $sites = array_combine(
       array_map(
-        function($membership) {return $membership->site->id;},
+        function($membership) {
+          return $membership->site->id;
+        },
         $this->site_memberships->all()
       ),
       array_map(
-        function($membership) {return $membership->site;},
+        function($membership) {
+          return $membership->site;
+        },
         $this->site_memberships->all()
       )
     );
@@ -85,11 +89,15 @@ class Organization extends TerminusModel {
   public function getUsers() {
     $users = array_combine(
       array_map(
-        function($membership) {return $membership->user->id;},
+        function($membership) {
+          return $membership->user->id;
+        },
         $this->user_memberships->all()
       ),
       array_map(
-        function($membership) {return $membership->user;},
+        function($membership) {
+          return $membership->user;
+        },
         $this->user_memberships->all()
       )
     );

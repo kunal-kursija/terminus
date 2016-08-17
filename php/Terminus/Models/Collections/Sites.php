@@ -34,6 +34,7 @@ class Sites extends TerminusCollection {
     $models = array_values($this->models);
     return $models;
   }
+
   /**
    * Creates a new site
    *
@@ -53,7 +54,7 @@ class Sites extends TerminusCollection {
     } else {
       $type = 'create_site_for_migration';
     }
-    
+
     $workflow = $this->user->workflows->create($type, compact('params'));
     return $workflow;
   }
@@ -70,7 +71,7 @@ class Sites extends TerminusCollection {
       'team_only' => false,
     ];
     $options         = array_merge($default_options, $arg_options);
-    
+
     if (is_null($options['org_id'])) {
       $sites = $this->user->getSites();
       if (!$options['team_only']) {
@@ -82,7 +83,7 @@ class Sites extends TerminusCollection {
     } else {
       $this->user->org_memberships->fetch();
       $sites = $this->user->org_memberships->get($options['org_id'])
-        ->organization->getSites();
+          ->organization->getSites();
     }
     foreach ($sites as $site) {
       if (!isset($this->models[$site->id])) {
@@ -203,12 +204,11 @@ class Sites extends TerminusCollection {
   public function nameIsTaken($name) {
     try {
       $this->findUuidByName($name);
+      //If this has not been caught, the name is taken.
+      $name_is_taken = true;
     } catch (\Exception $e) {
-      //We're using this to assign the exception to $e.
+      $name_is_taken = strpos($e->getMessage(), '404 Not Found') !== false;
     }
-    $name_is_taken = (
-      isset($e) && (strpos($e->getMessage(), '404 Not Found') !== false)
-    );
     return $name_is_taken;
   }
 
