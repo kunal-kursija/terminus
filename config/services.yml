@@ -1,0 +1,12 @@
+#config/services.yml
+services:
+  app.listener.command_exception:
+    class: Terminus\EventListener\ConsoleExceptionListener
+    arguments: ['@logger']
+    tags:
+      - { name: kernel.event_listener, event: console.exception }
+  app.listener.command_error:
+    class: Terminus\EventListener\ErrorLoggerListener
+    arguments: ['@logger']
+    tags:
+      - { name: kernel.event_listener, event: console.terminate }
