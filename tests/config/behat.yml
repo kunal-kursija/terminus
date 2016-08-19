@@ -32,7 +32,6 @@ default:
               host:                    'dashboard.pantheon.io'
               vcr_mode:                'new_episodes'
               test_site_name:          'behat-tests'
-              test_site_hostname:      'dev-behat-tests.pantheonsite.io'
               other_user:              'sara@getpantheon.com'
               php_site_domain:         'pantheonsite.io'
               instrument_label:        'Visa - 1111'
