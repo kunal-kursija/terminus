@@ -39,11 +39,10 @@ class OrganizationsCommand extends TerminusCommand {
     $data          = array();
     $organizations = $user->getOrganizations();
     foreach ($organizations as $id => $org) {
-      $org_data = $org->get('organization');
-      $data[]   = array(
-        'name' => $org_data->profile->name,
+      $data[]   = [
+        'name' => $org->get('profile')->name,
         'id' => $org->get('id'),
-      );
+      ];
     }
 
     $this->output()->outputRecordList($data);
