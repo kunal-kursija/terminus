@@ -27,6 +27,7 @@ class OrganizationsCommand extends TerminusCommand {
     $options['require_login'] = true;
     parent::__construct($options);
     $this->sites = new Sites();
+    $this->user  = Session::getUser();
   }
 
   /**
@@ -35,11 +36,10 @@ class OrganizationsCommand extends TerminusCommand {
    * @subcommand list
    */
   public function all($args, $assoc_args) {
-    $user          = Session::getUser();
-    $data          = array();
-    $organizations = $user->getOrganizations();
+    $data          = [];
+    $organizations = $this->user->getOrganizations();
     foreach ($organizations as $id => $org) {
-      $data[]   = [
+      $data[] = [
         'name' => $org->get('profile')->name,
         'id' => $org->get('id'),
       ];
@@ -69,82 +69,50 @@ class OrganizationsCommand extends TerminusCommand {
    */
   public function sites($args, $assoc_args) {
     $action   = array_shift($args);
-    $org_id   = $this->input()->orgId(
-      array(
-        'args'       => $assoc_args,
-        'allow_none' => false,
-      )
+    $org = $this->user->org_memberships->getOrganization(
+      $this->input()->orgId(['args' => $assoc_args, 'allow_none' => false,])
     );
-    // TODO: clarify that these are OrganizationMemberships, not Organization models
-    $orgs      = new UserOrganizationMemberships();
-    $org       = $orgs->get($org_id);
-    $org_info  = $org->get('organization');
-    $org_model = new Organization($org_info);
-
-    $memberships = $org->site_memberships->all();
 
     switch ($action) {
       case 'add':
         if (isset($assoc_args['site'])) {
-          if ($this->siteIsMember($memberships, $assoc_args['site'])) {
-            $this->failure(
-              '{site} is already a member of {org}',
-              array(
-                'site' => $assoc_args['site'],
-                'org' => $org_info->profile->name
-              )
-            );
-          } else {
-            $site = $this->sites->get($assoc_args['site']);
-          }
+          $site_id = $assoc_args['site'];
         } else {
-          $site = $this->sites->get(
-            $this->input()->menu(
-              array(
-                'choices' => $this->getNonmemberSiteList($memberships),
-                'message' => 'Choose site'
-              )
-            )
+          $site_id = $this->input()->menu(
+            [
+              'choices' => $this->getNonmemberSiteList(),
+              'message' => 'Choose site',
+            ]
           );
         }
+        $site = $this->sites->get($site_id);
         $this->input()->confirm(
-          array(
+          [
             'message' => 'Are you sure you want to add %s to %s ?',
-            'context' => array($site->get('name'), $org_info->profile->name),
-          )
+            'context' => [$site->get('name'), $org->get('profile')->name,],
+          ]
         );
-        $workflow = $org_model->site_memberships->addMember($site);
+        $workflow = $org->site_memberships->addMember($site);
         $workflow->wait();
         $this->workflowOutput($workflow);
           break;
       case 'remove':
         if (isset($assoc_args['site'])) {
-          if (!$this->siteIsMember($memberships, $assoc_args['site'])) {
-            $this->failure(
-              '{site} is not a member of {org}',
-              array(
-                'site' => $assoc_args['site'],
-                'org' => $org_info->profile->name
-              )
-            );
-          } else {
-            $site = $this->sites->get($assoc_args['site']);
-          }
+          $site_id = $assoc_args['site'];
         } else {
-          $site = $this->sites->get(
-            $this->input()->menu(
-              array(
-                'choices' => $this->getMemberSiteList($memberships),
-                'message' => 'Choose site',
-              )
-            )
+          $site_id = $this->input()->menu(
+            [
+              'choices' => $this->getMemberSiteList(),
+              'message' => 'Choose site',
+            ]
           );
         }
-        $member = $org_model->site_memberships->get($site->get('id'));
+        $site = $this->sites->get($site_id);
+        $member = $org->site_memberships->get($site->get('id'));
         $this->input()->confirm(
           array(
             'message' => 'Are you sure you want to remove %s from %s ?',
-            'context' => array($site->get('name'), $org_info->profile->name),
+            'context' => array($site->get('name'), $org->get('profile')->name),
           )
         );
         $workflow = $member->removeMember();
@@ -153,48 +121,8 @@ class OrganizationsCommand extends TerminusCommand {
           break;
       case 'list':
       default:
-        $data = [];
-        foreach ($memberships as $membership) {
-          if (isset($assoc_args['tag'])
-            && !(in_array($assoc_args['tag'], $membership->get('tags')))
-          ) {
-            continue;
-          }
-          $site       = $membership->get('site');
-          $data_array = array(
-            'name'          => null,
-            'id'            => null,
-            'service_level' => null,
-            'framework'     => null,
-            'created'       => null,
-            'tags'          => $membership->get('tags')
-          );
-          foreach ($data_array as $key => $value) {
-            if (($value == null) && isset($site->$key)) {
-              $data_array[$key] = $site->$key;
-            }
-          }
-          if (isset($site->frozen) && (boolean)$site->frozen) {
-            $data_array['frozen'] = true;
-          }
-          $data_array['created'] = date(
-            TERMINUS_DATE_FORMAT,
-            $data_array['created']
-          );
-          $data[] = $data_array;
-        }
-        if (empty($data)) {
-          $message = 'No sites match your ';
-          if (empty($assoc_args)
-            || ((count($assoc_args) == 1) && (isset($assoc_args['org'])))
-          ) {
-            $message .= 'criterion.';
-          } else {
-            $message .= 'criteria.';
-          }
-          $this->log()->info($message);
-        }
-        $this->output()->outputRecordList($data);
+        $data = $this->listOrganizationalSites($assoc_args);
+        return $data;
           break;
     }
   }
@@ -359,6 +287,65 @@ class OrganizationsCommand extends TerminusCommand {
     $sites   = $this->sites->getMemberList();
     $list    = array_diff($sites, $members);
     return $list;
+  }
+
+  /**
+   * Lists the sites belonging to an organization
+   *
+   * @param array $assoc_args Args from the command line
+   * @return array $data Data to display about sites in the organization
+   */
+  private function listOrganizationalSites($assoc_args) {
+    $org = $this->user->org_memberships->getOrganization(
+      $this->input()->orgId(['args' => $assoc_args, 'allow_none' => false,])
+    );
+
+    $tag = $this->input()->optional(
+      ['key' => 'tag', 'choices' => $assoc_args,]
+    );
+    $site_memberships = $org->site_memberships->all();
+    if (!is_null($tag)) {
+      $site_memberships = array_filter(
+        function ($membership) {
+          $has_tag = in_array($tag, $membership->get('tags'));
+          return $has_tag;
+        },
+        $site_memberships
+      );
+    }
+
+    $data = array_map(
+      function ($membership) {
+        $site = $membership->site;
+        $site_info = [
+          'name'          => $site->get('name'),
+          'id'            => $site->id,
+          'service_level' => $site->get('service_level'),
+          'framework'     => $site->get('framework'),
+          'created'       => date(TERMINUS_DATE_FORMAT, $site->get('created')),
+          'tags'          => $membership->get('tags'),
+        ];
+        if ((boolean)$site->get('frozen')) {
+          $site_info['frozen'] = true;
+        }
+        return $site_info;
+      },
+      $site_memberships
+    );
+
+    if (empty($data)) {
+      $message = 'No sites match your ';
+      if (empty($assoc_args)
+        || ((count($assoc_args) == 1) && (isset($assoc_args['org'])))
+      ) {
+        $message .= 'criterion.';
+      } else {
+        $message .= 'criteria.';
+      }
+      $this->log()->info($message);
+    }
+    $this->output()->outputRecordList($data);
+    return $data;
   }
 
   /**

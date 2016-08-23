@@ -77,18 +77,39 @@ class OrganizationSiteMemberships extends TerminusCollection {
   }
 
   /**
+   * Retrieves the matching site from model members
+   *
+   * @param string $org ID or name of desired organization
+   * @return Site $site
+   * @throws TerminusException
+   */
+  public function getSite($site_id) {
+    $memberships = $this->all();
+    foreach($memberships as $membership) {
+      $site = $membership->site;
+      if (in_array($site_id, [$site->id, $site->get('name'),])) {
+        return $site;
+      }
+    }
+    throw new TerminusException(
+      'This user does is not a member of an organizaiton identified by {id}.',
+      ['id' => $site_id,]
+    );
+  }
+
+  /**
    * Determines whether a site is a member of this collection
    *
    * @param Site $site Site to determine membership of
    * @return bool
    */
   public function siteIsMember($site) {
-    foreach ($this->models as $model) {
-      if ($site->id == $model->site->id) {
-        return true;
-      }
+    try {
+      $this->getSite($site);
+      return true;
+    } catch (TerminusException $e) {
+      return false;
     }
-    return false;
   }
 
   /**

@@ -40,28 +40,24 @@ class UserOrganizationMemberships extends TerminusCollection {
   }
 
   /**
-   * Retrieves the model of the given ID
+   * Retrieves the matching organization from model members
    *
-   * @param string $id ID or name of desired organization
-   * @return UserOrganizationMembership $model
+   * @param string $org ID or name of desired organization
+   * @return Organization $organization
+   * @throws TerminusException
    */
-  public function get($id) {
-    $model = null;
-    if (isset($this->models[$id])) {
-      $model = $this->models[$id];
-    } else {
-      foreach ($this->models as $model_candidate) {
-        if ((isset($model_candidate->profile)
-            && ($id == $model_candidate->profile->name))
-          || (isset($model_candidate->get('organization')->profile)
-            && $model_candidate->get('organization')->profile->name == $id)
-        ) {
-          $model = $model_candidate;
-          break;
-        }
+  public function getOrganization($org) {
+    $memberships = $this->all();
+    foreach($memberships as $membership) {
+      $organization = $membership->organization;
+      if (in_array($org, [$organization->id, $organization->get('name'),])) {
+        return $organization;
       }
     }
-    return $model;
+    throw new TerminusException(
+      'This user does is not a member of an organizaiton identified by {org}.',
+      compact('org')
+    );
   }
 
   /**
