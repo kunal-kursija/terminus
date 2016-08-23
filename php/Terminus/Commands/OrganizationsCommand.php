@@ -75,30 +75,7 @@ class OrganizationsCommand extends TerminusCommand {
         $this->addSiteToOrganization($assoc_args);
           break;
       case 'remove':
-        $org = $this->user->org_memberships->getOrganization(
-          $this->input()->orgId(['args' => $assoc_args, 'allow_none' => false,])
-        );
-        if (isset($assoc_args['site'])) {
-          $site_id = $assoc_args['site'];
-        } else {
-          $site_id = $this->input()->menu(
-            [
-              'choices' => $this->getMemberSiteList(),
-              'message' => 'Choose site',
-            ]
-          );
-        }
-        $site = $this->sites->get($site_id);
-        $member = $org->site_memberships->get($site->get('id'));
-        $this->input()->confirm(
-          array(
-            'message' => 'Are you sure you want to remove %s from %s ?',
-            'context' => array($site->get('name'), $org->get('profile')->name),
-          )
-        );
-        $workflow = $member->removeMember();
-        $workflow->wait();
-        $this->workflowOutput($workflow);
+        $this->removeSiteFromOrganization($assoc_args);
           break;
       case 'list':
       default:
@@ -294,7 +271,65 @@ class OrganizationsCommand extends TerminusCommand {
         'context' => [$site->get('name'), $org->get('profile')->name,],
       ]
     );
-    $workflow = $org->site_memberships->add($site);
+    $workflow = $org->site_memberships->create($site);
+    $workflow->wait();
+    $this->workflowOutput($workflow);
+  }
+
+  /**
+   * Removes a site from an organization
+   *
+   * @param array $assoc_args Arguments from the command line
+   * @return void
+   */
+  private function removeSiteFromOrganization($assoc_args) {
+    $org = $this->user->org_memberships->getOrganization(
+      $this->input()->orgId(['args' => $assoc_args, 'allow_none' => false,])
+    );
+    $site_memberships = $org->site_memberships->all();
+    $choices = array_combine(
+      array_map(
+        function ($membership) {
+          return $membership->site->id;
+        },
+        $site_memberships
+      ),
+      array_map(
+        function ($membership) {
+          $site_name = $membership->site->get('name');
+          return $site_name;
+        },
+        $site_memberships
+      )
+    );
+    $site = $this->input()->siteName(
+      [
+        'choices'       => array_combine(
+          array_map(
+            function ($membership) {
+              return $membership->site->id;
+            },
+            $site_memberships
+          ),
+          array_map(
+            function ($membership) {
+              $site_name = $membership->site->get('name');
+              return $site_name;
+            },
+            $site_memberships
+          )
+        ),
+        'message'       => 'Choose site',
+        'return_object' => true,
+      ]
+    );
+    $this->input()->confirm(
+      [
+        'message' => 'Are you sure you want to remove %s from %s ?',
+        'context' => [$site->get('name'), $org->get('profile')->name,],
+      ]
+    );
+    $workflow = $org->site_memberships->delete($site);
     $workflow->wait();
     $this->workflowOutput($workflow);
   }
