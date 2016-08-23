@@ -69,34 +69,15 @@ class OrganizationsCommand extends TerminusCommand {
    */
   public function sites($args, $assoc_args) {
     $action   = array_shift($args);
-    $org = $this->user->org_memberships->getOrganization(
-      $this->input()->orgId(['args' => $assoc_args, 'allow_none' => false,])
-    );
 
     switch ($action) {
       case 'add':
-        if (isset($assoc_args['site'])) {
-          $site_id = $assoc_args['site'];
-        } else {
-          $site_id = $this->input()->menu(
-            [
-              'choices' => $this->getNonmemberSiteList(),
-              'message' => 'Choose site',
-            ]
-          );
-        }
-        $site = $this->sites->get($site_id);
-        $this->input()->confirm(
-          [
-            'message' => 'Are you sure you want to add %s to %s ?',
-            'context' => [$site->get('name'), $org->get('profile')->name,],
-          ]
-        );
-        $workflow = $org->site_memberships->addMember($site);
-        $workflow->wait();
-        $this->workflowOutput($workflow);
+        $this->addSiteToOrganization($assoc_args);
           break;
       case 'remove':
+        $org = $this->user->org_memberships->getOrganization(
+          $this->input()->orgId(['args' => $assoc_args, 'allow_none' => false,])
+        );
         if (isset($assoc_args['site'])) {
           $site_id = $assoc_args['site'];
         } else {
@@ -262,31 +243,60 @@ class OrganizationsCommand extends TerminusCommand {
   }
 
   /**
-   * Retrieves a succinct list of member sites
+   * Adds an existing site to an organization
    *
-   * @param OrganizationSiteMembership[] $memberships Members of this org
-   * @return array
+   * @param array $assoc_args Arguments from the command line
+   * @return void
    */
-  private function getMemberSiteList(array $memberships) {
-    $list = array();
-    foreach ($memberships as $membership) {
-      $site = $membership->get('site');
-      $list[$site->id] = $site->name;
-    }
-    return $list;
-  }
-
-  /**
-   * Retrieves a succinct list of non-member sites
-   *
-   * @param OrganizationSiteMembership[] $memberships Members of this org
-   * @return array
-   */
-  private function getNonmemberSiteList($memberships) {
-    $members = $this->getMemberSiteList($memberships);
-    $sites   = $this->sites->getMemberList();
-    $list    = array_diff($sites, $members);
-    return $list;
+  private function addSiteToOrganization($assoc_args) {
+    $org = $this->user->org_memberships->getOrganization(
+      $this->input()->orgId(['args' => $assoc_args, 'allow_none' => false,])
+    );
+    $choices = array_combine(
+      array_map(
+        function ($membership) {
+          return $membership->site->id;
+        },
+        $this->user->site_memberships->all()
+      ),
+      array_map(
+        function ($membership) {
+          $site_name = $membership->site->get('name');
+          return $site_name;
+        },
+        $this->user->site_memberships->all()
+      )
+    );
+    $site = $this->input()->siteName(
+      [
+        'choices'       => array_combine(
+          array_map(
+            function ($membership) {
+              return $membership->site->id;
+            },
+            $this->user->site_memberships->all()
+          ),
+          array_map(
+            function ($membership) {
+              $site_name = $membership->site->get('name');
+              return $site_name;
+            },
+            $this->user->site_memberships->all()
+          )
+        ),
+        'message'       => 'Choose site',
+        'return_object' => true,
+      ]
+    );
+    $this->input()->confirm(
+      [
+        'message' => 'Are you sure you want to add %s to %s ?',
+        'context' => [$site->get('name'), $org->get('profile')->name,],
+      ]
+    );
+    $workflow = $org->site_memberships->add($site);
+    $workflow->wait();
+    $this->workflowOutput($workflow);
   }
 
   /**
@@ -346,21 +356,6 @@ class OrganizationsCommand extends TerminusCommand {
     }
     $this->output()->outputRecordList($data);
     return $data;
-  }
-
-  /**
-   * Determines whether the site is a member of an org
-   *
-   * @param OrganizationSiteMembership[] $memberships Members of this org
-   * @return bool
-   */
-  private function siteIsMember($memberships, $site_id) {
-    $list      = $this->getMemberSiteList($memberships);
-    $is_member = (
-      isset($list[$site_id])
-      || (array_search($site_id, $list) !== false)
-    );
-    return $is_member;
   }
 
 }

@@ -767,20 +767,26 @@ class InputHelper extends TerminusHelper {
 
   /**
    * Input helper that provides interactive site list
+   * TODO: Have this always return site objects, change commands accordingly.
    *
    * @param array $arg_options Elements as follow:
-   *        array  args    The args passed in from argv
-   *        string key     Args key to search for
-   *        string message Prompt for STDOUT
+   *        array   args          The args passed in from argv
+   *        Site[]  choices       An array of sites to use as options
+   *        string  key           Args key to search for
+   *        string  message       Prompt for STDOUT
+   *        boolean return_object True to return relevant site object
    * @return string Site name
   */
   public function siteName(array $arg_options = []) {
     $default_options = [
-      'args'  => [],
-      'key'   => 'site',
-      'message' => 'Choose site',
+      'args'          => [],
+      'choices'       => [],
+      'key'           => 'site',
+      'message'       => 'Choose site',
+      'return_object' => false,
     ];
     $options         = array_merge($default_options, $arg_options);
+    $sites           = new Sites();
 
     // return early if sitename is provided in args
     if (isset($options['args'][$options['key']])) {
@@ -789,23 +795,38 @@ class InputHelper extends TerminusHelper {
     if (isset($_SERVER['TERMINUS_SITE'])) {
       return $_SERVER['TERMINUS_SITE'];
     }
-    $sites     = new Sites();
-    $sites     = $sites->all();
-    $sitenames = array_map(
-      function(Site $site) {
-        $site_name = $site->get('name');
-        return $site_name;
-      }, $sites
-    );
-
-    $choices = [];
-    foreach ($sitenames as $sitename) {
-      $choices[$sitename] = $sitename;
+    if (empty($options['choices'])) {
+      $sites     = $sites->all();
+      $choices = array_combine(
+        array_map(
+          function(Site $site) {
+            $site_name = $site->get('name');
+            return $site_name;
+          },
+          $sites
+        ),
+        array_map(
+          function(Site $site) {
+            return $site->id;
+          },
+          $sites
+        )
+      );
+    } else {
+      $choices = $options['choices'];
     }
-    $menu = $this->menu(
-      ['choices' => $choices, 'message' => $options['message']]
+
+    $site = $this->menu(
+      [
+        'choices'      => $choices,
+        'message'      => $options['message'],
+        'return_value' => $options['return_object'],
+      ]
     );
-    return $menu;
+    if ($options['return_object']) {
+      $site = $sites->get($site);
+    }
+    return $site;
   }
 
   /**
